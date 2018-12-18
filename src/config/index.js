@@ -12,4 +12,12 @@ export default {
   database: {
     url: process.env.DB_URI || 'mongodb://localhost:32768/url-shortener',
   },
+  short: {
+    urlRegex: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/,
+    hashChars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+    // WARNING: Changing the length of a hash will disable all previously created short urls
+    hashLength: 6,
+    // hashChars: 'ABC',
+    // hashLength: 1,
+  }
 }
