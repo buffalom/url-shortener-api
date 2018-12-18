@@ -20,8 +20,6 @@ export default {
     hashChars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
     // WARNING: Changing the length of a hash will disable all previously created short urls
     hashLength: 6,
-    // hashChars: 'ABC', // (For testing)
-    // hashLength: 1, // (For testing)
   },
   auth: {
     secret: process.env.AUTH_SECRET || 'superduperultrasecret',
