@@ -4,11 +4,12 @@ import redis from 'redis'
 import bcrypt from 'bcrypt'
 import cors from 'cors'
 import './utils/mongo'
-import { createJwt, getPayloadFromCookie } from './utils/helpers'
+import { createJwt } from './utils/helpers'
 import config from './config'
 import logger from './utils/logger'
 import bodyParser from 'body-parser'
 import useragent from 'useragent'
+import authMiddleware from './middleware/auth'
 
 // Make the useragent-parser update it's datebase frequently
 useragent(true)
@@ -96,7 +97,12 @@ app.post('/login', async (req, res) => {
   }
 })
 
-app.post('/short', async (req, res) => {
+app.get('/shorts', authMiddleware, async (req, res) => {
+  await req.user.populate('shorts').execPopulate()
+  res.send(req.user.shorts)
+})
+
+app.post('/shorts', authMiddleware, async (req, res) => {
   if (!req.body.url || !req.body.url.match(config.matchers.url)) res.status(400).send('Invalid url')
 
   let hash
@@ -116,10 +122,13 @@ app.post('/short', async (req, res) => {
 
   res.send(hash)
   
-  Short.create({
+  let short = await Short.create({
     hash,
     url: req.body.url,
   })
+
+  req.user.shorts.push(short)
+  await req.user.save()
 })
 
 app.get(`/:hash([a-zA-Z0-9]{${config.short.hashLength}})`, async (req, res) => {
@@ -177,7 +186,7 @@ app.get(`/:hash([a-zA-Z0-9]{${config.short.hashLength}})`, async (req, res) => {
     device.calls++
   }
 
-  short.save()
+  await short.save()
 })
 
 app.listen(config.server.port, () => {

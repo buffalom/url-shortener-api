@@ -1,9 +1,11 @@
-import User from "../models/User"
+import logger from '../utils/logger'
+import { createJwt, getPayloadFromCookie } from '../utils/helpers'
+import config from '../config'
+import User from '../models/User'
 
-export default (req, res, next) => {
+export default async (req, res, next) => {
   try {
     let payload = await getPayloadFromCookie(req.headers.cookie)
-    console.log('Payload:', payload)
 
     // JWT expired
     if (payload.exp < + new Date()) throw new Error('jwt has expired')
