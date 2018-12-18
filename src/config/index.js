@@ -12,12 +12,23 @@ export default {
   database: {
     url: process.env.DB_URI || 'mongodb://localhost:32768/url-shortener',
   },
+  matchers: {
+    url: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/,
+    email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+  },
   short: {
-    urlRegex: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/,
     hashChars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
     // WARNING: Changing the length of a hash will disable all previously created short urls
     hashLength: 6,
-    // hashChars: 'ABC',
-    // hashLength: 1,
-  }
+    // hashChars: 'ABC', // (For testing)
+    // hashLength: 1, // (For testing)
+  },
+  auth: {
+    secret: process.env.AUTH_SECRET || 'superduperultrasecret',
+    saltRounds: 10,
+    jwtExpiryHours: 168, // 7 Days
+    // jwtExpiryHours: 0.002777778 * 2, // 20 Seconds (For testing)
+    jwtRefreshHours: 24, // 1 Day
+    // jwtRefreshHours: 0.002777778 / 2, // 5 Seconds (For testing)
+  },
 }

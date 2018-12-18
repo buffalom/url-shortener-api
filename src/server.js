@@ -1,9 +1,10 @@
 import express from 'express'
 import bluebird from 'bluebird'
 import redis from 'redis'
+import bcrypt from 'bcrypt'
 import cors from 'cors'
 import './utils/mongo'
-import './utils/helpers'
+import { createJwt, getPayloadFromCookie } from './utils/helpers'
 import config from './config'
 import logger from './utils/logger'
 import bodyParser from 'body-parser'
@@ -27,16 +28,99 @@ red.on('ready', (err) => {
 })
 
 // Models
+import User from './models/User'
 import Short from './models/Short'
 import Stats from './models/Stats'
 import Version from './models/Version'
 
 const app = express()
-app.use(cors())
+app.use(cors({
+  origin: config.server.allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST'],
+}))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
   extended: true
 }))
+
+app.post('/signup', async (req, res) => {
+  try {
+    if (!req.body.email) {
+      throw new Error('No Email provided')
+    }
+    if (!req.body.password) {
+      throw new Error('No Password provided')
+    }
+    if (req.body.password !== req.body.passwordConfirm) {
+      throw new Error('Passwords do not match')
+    }
+
+    const passwordHash = await bcrypt.hash(req.body.password, config.auth.saltRounds)
+    let user = await User.create({
+      email: req.body.email,
+      passwordHash,
+    })
+    logger.logInfo(`User signed up: ${user.email}`)
+    res.send({ message: 'Signup successful' })
+  } catch (err) {
+    logger.logError(err)
+    res.status(500).send({ message: 'Could not create user' })
+  }
+})
+
+app.post('/login', async (req, res) => {
+  try {
+    let user = await User.findOne({
+      email: req.body.email,
+    })
+    if (!user) {
+      throw new Error('Could not find user with email')
+    }
+    if (await bcrypt.compare(req.body.password, user.passwordHash)) {
+      let createdJwt = await createJwt(user.email)
+      res.cookie('AccessToken', createdJwt.token, {
+        maxAge: createdJwt.timeToExpire,
+        httpOnly: true,
+        secure: config.env === 'production',
+      })
+      logger.logInfo(`User logged in: ${user.email}`)
+      res.send({ message: 'Login successful' })
+    } else {
+      throw new Error('Password incorrect')
+    }
+  } catch (err) {
+    logger.logInfo(`User failed to log in: ${req.body.email}`)
+    logger.logError(err)
+    res.status(500).send({ message: 'Could not log in' })
+  }
+})
+
+app.post('/short', async (req, res) => {
+  if (!req.body.url || !req.body.url.match(config.matchers.url)) res.status(400).send('Invalid url')
+
+  let hash
+  do {
+    hash = ''
+    for (let i = 0; i < config.short.hashLength; i++) {
+      hash += config.short.hashChars.charAt(Math.floor(Math.random() * config.short.hashChars.length))
+    }
+  } while (await Short.findOne({ hash }))
+
+  try {
+    await red.set(hash, req.body.url)
+  } catch (err) {
+    res.status(500).send('Could not create short url')
+    return
+  }
+
+  res.send(hash)
+  
+  Short.create({
+    hash,
+    url: req.body.url,
+  })
+})
 
 app.get(`/:hash([a-zA-Z0-9]{${config.short.hashLength}})`, async (req, res) => {
   let url
@@ -94,32 +178,6 @@ app.get(`/:hash([a-zA-Z0-9]{${config.short.hashLength}})`, async (req, res) => {
   }
 
   short.save()
-})
-
-app.post('/short', async (req, res) => {
-  if (!req.body.url || !req.body.url.match(config.short.urlRegex)) res.status(400).send('Invalid url')
-
-  let hash
-  do {
-    hash = ''
-    for (let i = 0; i < config.short.hashLength; i++) {
-      hash += config.short.hashChars.charAt(Math.floor(Math.random() * config.short.hashChars.length))
-    }
-  } while (await Short.findOne({ hash }))
-
-  try {
-    await red.set(hash, req.body.url)
-  } catch (err) {
-    res.status(500).send('Could not create short url')
-    return
-  }
-
-  res.send(hash)
-  
-  Short.create({
-    hash,
-    url: req.body.url,
-  })
 })
 
 app.listen(config.server.port, () => {

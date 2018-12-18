@@ -20,7 +20,7 @@ export const shortSchema = new Schema({
   url: {
     type: String,
     required: true,
-    match: config.short.urlRegex,
+    match: config.matchers.url,
   },
   stats: {
     type: statsSchema,
