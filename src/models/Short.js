@@ -1,31 +1,34 @@
 import mongoose from 'mongoose'
 import uniqueValidator from 'mongoose-unique-validator'
-import { agentSchema } from './Agent'
+import Stats, { statsSchema } from './Stats'
 import config from '../config'
 
 const Schema = mongoose.Schema
 
-export const urlSchema = new Schema({
+export const shortSchema = new Schema({
   _id: {
     type: Schema.Types.ObjectId,
     required: true,
     auto: true
   },
-  short: {
+  hash: {
     type: String,
     required: true,
     index: true,
     unique: true,
-    match: config.short.urlRegex
   },
-  link: {
+  url: {
     type: String,
     required: true,
+    match: config.short.urlRegex,
   },
-  agent: agentSchema,
-}, { collection: 'urls', timestamps: true, autoIndex: false })
+  stats: {
+    type: statsSchema,
+    default: new Stats(),
+  },
+}, { collection: 'shorts', timestamps: true, autoIndex: false })
   .plugin(uniqueValidator)
 
-const Url = mongoose.model('Url', urlSchema)
+const Short = mongoose.model('Short', shortSchema)
 
-export default Url
+export default Short

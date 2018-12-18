@@ -9,8 +9,8 @@ mongoose.Types.ObjectId.prototype.valueOf = function () {
 const connection = mongoose.connect(config.database.url, { useNewUrlParser: true }).then(
   async () => {
     // Load models
-    require('../models/Url')
-    require('../models/Agent')
+    require('../models/Short')
+    require('../models/Stats')
     require('../models/Version')
 
     logger.logInfo('Successfully connected to database')

@@ -7,6 +7,7 @@ export const versionSchema = new Schema({
   major: String,
   minor: String,
   patch: String,
+  calls: Number,
 })
 
 const Version = mongoose.model('Version', versionSchema)
