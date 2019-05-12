@@ -18,7 +18,7 @@ bluebird.promisifyAll(redis.RedisClient.prototype)
 bluebird.promisifyAll(redis.Multi.prototype)
 
 // Create redis client
-var red = redis.createClient(32773)
+var red = redis.createClient(config.database.redisUrl)
 red.on('error', (err) => {
   logger.logError('An error occured while connecting to redis')
   logger.logError(err)
@@ -103,6 +103,7 @@ app.get('/shorts', authMiddleware, async (req, res) => {
 })
 
 app.post('/shorts', authMiddleware, async (req, res) => {
+  req.body.url = 'https://tomdgm.ch'
   if (!req.body.url || !req.body.url.match(config.matchers.url)) res.status(400).send('Invalid url')
 
   let hash

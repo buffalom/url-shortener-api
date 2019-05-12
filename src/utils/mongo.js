@@ -6,7 +6,7 @@ mongoose.Types.ObjectId.prototype.valueOf = function () {
   return this.toString()
 }
 
-const connection = mongoose.connect(config.database.url, { useNewUrlParser: true }).then(
+const connection = mongoose.connect(config.database.dbUrl, { useNewUrlParser: true }).then(
   async () => {
     // Load models
     require('../models/User')
