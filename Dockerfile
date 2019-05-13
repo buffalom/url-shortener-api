@@ -8,7 +8,5 @@ RUN npm install
 
 COPY . .
 
-RUN apt-get install -y curl
-
 EXPOSE 3000
 CMD [ "npm", "start" ]
