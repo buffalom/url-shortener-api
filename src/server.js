@@ -1,10 +1,11 @@
 import express from 'express'
 import bluebird from 'bluebird'
-import redis from 'redis'
 import bcrypt from 'bcrypt'
 import cors from 'cors'
+import redis from 'redis'
+import red from './utils/redis'
 import './utils/mongo'
-import { createJwt } from './utils/helpers'
+import { createJwt, populateRedisFromMongo } from './utils/helpers'
 import config from './config'
 import logger from './utils/logger'
 import bodyParser from 'body-parser'
@@ -16,17 +17,6 @@ useragent(true)
 // Use promises for redis
 bluebird.promisifyAll(redis.RedisClient.prototype)
 bluebird.promisifyAll(redis.Multi.prototype)
-
-// Create redis client
-var red = redis.createClient(config.database.redisUrl)
-red.on('error', (err) => {
-  logger.logError('An error occured while connecting to redis')
-  logger.logError(err)
-  process.exit(1)
-})
-red.on('ready', (err) => {
-  logger.logInfo('Successfully connected to redis')
-})
 
 // Models
 import User from './models/User'
@@ -44,6 +34,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
   extended: true
 }))
+
+// Populate Redis from MongoDB
+populateRedisFromMongo()
 
 app.post('/signup', async (req, res) => {
   try {
@@ -103,7 +96,6 @@ app.get('/shorts', authMiddleware, async (req, res) => {
 })
 
 app.post('/shorts', authMiddleware, async (req, res) => {
-  req.body.url = 'https://tomdgm.ch'
   if (!req.body.url || !req.body.url.match(config.matchers.url)) res.status(400).send('Invalid url')
 
   let hash

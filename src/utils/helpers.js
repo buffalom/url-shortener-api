@@ -1,5 +1,13 @@
+import logger from './logger'
 import config from '../config'
 import jwt from 'jsonwebtoken'
+import red from './redis'
+
+// Models
+import User from '../models/User'
+import Short from '../models/Short'
+import Stats from '../models/Stats'
+import Version from '../models/Version'
 
 export const getPayloadFromCookie = async (cookieHeader) => {
   if (!cookieHeader) throw new Error('No cookie header provided')
@@ -21,4 +29,17 @@ export const createJwt = async (email) => {
     exp: createdJwt.expiryDate
   }, config.auth.secret)
   return createdJwt
+}
+
+export const populateRedisFromMongo = async () => {
+  const start = new Date()
+  let shorts = await Short.find({})
+  logger.logInfo(`Populating ${shorts.length} items in Redis from MongoDB`)
+
+  for (let short of shorts) {
+    await red.set(short.hash, short.url)
+  }
+
+  const millis = new Date() - start
+  logger.logInfo(`Finished populating. Population took ${millis / 1000} seconds`)
 }
