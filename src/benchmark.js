@@ -1,55 +1,119 @@
 var fs = require('fs')
 var path = require('path')
+var axios = require('axios')
 var apiBenchmark = require('api-benchmark')
 
-const ACCESS_TOKEN = 'SOME_VALID_TOKEN'
-const OUTPUT_FILE = path.join(__dirname, '../benchmarks.html')
-
-var service = {
+const EMAIL = 'test@test.test'
+const PASSWORD = 'asdf'
+const SERVICE = {
   api: 'http://localhost:3000'
 }
+const URL_TO_SHORT = 'https://www.tomdgm.ch/'
 
-var routes = {
-  short: {
-    method: 'post',
-    route: '/shorts',
-    headers: {
-      'Cookie': 'AccessToken=' + ACCESS_TOKEN
-    },
-    data: {
-      url: 'https://tomdgm.ch'
-    },
-  },
-  shorts: {
-    method: 'get',
-    route: '/shorts',
-    headers: {
-      'Cookie': 'AccessToken=' + ACCESS_TOKEN
-    },
-  },
-  redirect: {
-    method: 'get',
-    route: '/mmdeAp',
-  },
-}
+async function main() {
+  let cookieHeader = ''
+  let shortForRedirectBenchmark = ''
 
-var options = {
-  runMode: 'sequence',
-  maxConcurrentRequests: 1,
-  minSamples: 100
-}
- 
-apiBenchmark.measure(service, routes, options, (err, results) => {
-  if (err) {
-    console.error(err)
+  // Signup
+  try {
+    let res = await axios({
+      method: 'POST',
+      url: SERVICE.api + '/signup',
+      data: {
+        email: EMAIL,
+        password: PASSWORD,
+        passwordConfirm: PASSWORD
+      }
+    })
+    console.log('Signed up.')
+  } catch(err) {
+    console.log('Could not sign up. Assuming already signed up.')
+  }
+
+  // Login
+  try {
+    let res = await axios({
+      method: 'POST',
+      url: SERVICE.api + '/login',
+      data: {
+        email: EMAIL,
+        password: PASSWORD
+      }
+    })
+    cookieHeader = res.headers['set-cookie'][0]
+    console.log('Logged in.')
+  } catch(err) {
+    console.log('Could not log in.')
+    console.log(err)
     return
   }
-  apiBenchmark.getHtml(results, (err, html) => {
+
+  // Create short-url for redirect benchmark
+  try {
+    let res = await axios({
+      method: 'POST',
+      url: SERVICE.api + '/shorts',
+      data: {
+        url: URL_TO_SHORT
+      },
+      headers: {
+        'Cookie': cookieHeader
+      }
+    })
+    shortForRedirectBenchmark = res.data
+    console.log('Short for redirect benchmark created.')
+  } catch(err) {
+    console.log('Could not create short-url for redirect benchmark.')
+    console.log(err)
+    return
+  }
+
+  // Benchmark
+  const OUTPUT_FILE = path.join(__dirname, '../benchmarks.html')
+  
+  var routes = {
+    short: {
+      method: 'post',
+      route: '/shorts',
+      headers: {
+        'Cookie': cookieHeader
+      },
+      data: {
+        url: URL_TO_SHORT
+      },
+    },
+    shorts: {
+      method: 'get',
+      route: '/shorts',
+      headers: {
+        'Cookie': cookieHeader
+      },
+    },
+    redirect: {
+      method: 'get',
+      route: '/' + shortForRedirectBenchmark,
+    },
+  }
+  
+  var options = {
+    runMode: 'sequence',
+    maxConcurrentRequests: 1,
+    minSamples: 100
+  }
+   
+  apiBenchmark.measure(SERVICE, routes, options, (err, results) => {
     if (err) {
       console.error(err)
       return
     }
-    fs.writeFileSync(OUTPUT_FILE, html)
-    console.log('Done. Output written to ' + OUTPUT_FILE)
+    apiBenchmark.getHtml(results, (err, html) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      fs.writeFileSync(OUTPUT_FILE, html)
+      console.log('Done. Output written to ' + OUTPUT_FILE)
+    })
   })
-})
+}
+main()

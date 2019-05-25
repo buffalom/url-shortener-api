@@ -4,10 +4,11 @@
 
 The following npm commands are available:
 
-| Command             	| Description                    	|
-|---------------------	|--------------------------------	|
-| npm start           	| Start api.                     	|
-| npm run dbgod -- -h 	| Get help for the dbgod script. 	|
+| Command               | Description                                 |
+|-----------------------|---------------------------------------------|
+| npm start             | Start api.                                  |
+| npm run dbgod -- -h   | Get help for the dbgod script.              |
+| npm run bench         | Start api benchmarks. (api must be running) |
 
 ## Deployment
 
