@@ -1,4 +1,12 @@
 import path from 'path'
+import logger from '../utils/logger'
+
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.AUTH_SECRET) {
+    logger.logError(new Error('AUTH_SECRET environment variable is required on production'))
+    process.exit(9)
+  }
+}
 
 export default {
   env: process.env.NODE_ENV || 'production',

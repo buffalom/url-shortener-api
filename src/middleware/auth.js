@@ -27,6 +27,7 @@ export default async (req, res, next) => {
   } catch (err) {
     logger.logError(err)
     res.status(403).send({ message: 'Unauthorized' })
+    return
   }
 
   next()

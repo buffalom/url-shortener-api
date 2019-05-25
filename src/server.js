@@ -183,5 +183,6 @@ app.get(`/:hash([a-zA-Z0-9]{${config.short.hashLength}})`, async (req, res) => {
 })
 
 app.listen(config.server.port, () => {
+  logger.logInfo(`Environment: ${config.env}`)
   logger.logInfo(`URL-Shortener API listening on port ${config.server.port}!`)
 })
