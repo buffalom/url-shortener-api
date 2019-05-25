@@ -16,6 +16,9 @@ var routes = {
     headers: {
       'Cookie': 'AccessToken=' + ACCESS_TOKEN
     },
+    data: {
+      url: 'https://tomdgm.ch'
+    },
   },
   shorts: {
     method: 'get',
@@ -31,13 +34,21 @@ var routes = {
 }
 
 var options = {
-  runMode: 'parallel',
+  runMode: 'sequence',
   maxConcurrentRequests: 1,
   minSamples: 100
 }
  
 apiBenchmark.measure(service, routes, options, (err, results) => {
+  if (err) {
+    console.error(err)
+    return
+  }
   apiBenchmark.getHtml(results, (err, html) => {
+    if (err) {
+      console.error(err)
+      return
+    }
     fs.writeFileSync(OUTPUT_FILE, html)
     console.log('Done. Output written to ' + OUTPUT_FILE)
   })
