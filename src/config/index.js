@@ -18,8 +18,8 @@ export default {
     ],
   },
   database: {
-    redisUrl: process.env.REDIS_URL || 'redis://localhost:32768',
-    dbUrl: process.env.DB_URL || 'mongodb://localhost:32769/url-shortener',
+    redisUrl: process.env.REDIS_URL || 'redis://url-shortener-redis:6379',
+    dbUrl: process.env.DB_URL || 'mongodb://url-shortener-mongo:27017/url-shortener',
   },
   matchers: {
     url: /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/,
