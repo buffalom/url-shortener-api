@@ -1,4 +1,6 @@
-# url-shortener-api
+# URL-Shortener API
+
+A Restful URL-Shortener API based on Node.js, Redis and MongoDB.
 
 ## Development
 
