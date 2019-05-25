@@ -1,7 +1,7 @@
 import path from 'path'
 
 export default {
-  env: process.env.NODE_ENV || 'development',
+  env: process.env.NODE_ENV || 'production',
   rootDir: path.join(__dirname + '/../..'),
   server: {
     port: process.env.PORT || 3000,
