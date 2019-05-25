@@ -25,7 +25,7 @@ docker run -it -e NODE_ENV='production' -e REDIS_URL='redis://url-shortener-redi
 
 | Key         	| Description                                                                                  	| Default                                           	| Hint                                 	|
 |-------------	|----------------------------------------------------------------------------------------------	|---------------------------------------------------	|--------------------------------------	|
-| Port        	| Port to start api on.                                                                        	| 3000                                              	|                                      	|
+| PORT        	| Port to start api on.                                                                        	| 3000                                              	|                                      	|
 | DB_URL      	| URL to use to connect to mongo db.                                                           	| mongodb://url-shortener-mongo:27017/url-shortener 	|                                      	|
 | REDIS_URL   	| URL to use to connect to redis.                                                              	| redis://url-shortener-redis:6379                  	|                                      	|
 | AUTH_SECRET 	| Secret to use to sign JWT token. A new secret will reset all deactivate all existing tokens. 	| superduperultrasecret                             	| Required if NODE_ENV is 'production' 	|
