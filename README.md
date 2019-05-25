@@ -14,7 +14,7 @@ The following npm commands are available:
 
 Use the following Docker commands to start mongodb, redis and the api.
 
-```docker
+```bash
 docker network create url-shortener
 docker run -d --name url-shortener-redis --net url-shortener redis:latest
 docker run -d --name url-shortener-mongo --net url-shortener mongo:latest
