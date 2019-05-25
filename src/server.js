@@ -96,7 +96,10 @@ app.get('/shorts', authMiddleware, async (req, res) => {
 })
 
 app.post('/shorts', authMiddleware, async (req, res) => {
-  if (!req.body.url || !req.body.url.match(config.matchers.url)) res.status(400).send('Invalid url')
+  if (!req.body.url || !req.body.url.match(config.matchers.url)) {
+    res.status(400).send('Invalid url')
+    return
+  }
 
   let hash
   do {
@@ -129,14 +132,19 @@ app.get(`/:hash([a-zA-Z0-9]{${config.short.hashLength}})`, async (req, res) => {
   try {
     url = await red.getAsync(req.params.hash)
   } catch (err) {
-    res.status(404).send('Could not find short url')
+    res.status(404).send(`Could not find short url with hash ${req.params.hash}`)
     return
   }
   res.redirect(url)
 
   let user = useragent.lookup(req.headers['user-agent']).toJSON()
   let short = await Short.findOne({ hash: req.params.hash })
-  
+
+  if (!short) {
+    logger.logError(new Error(`Could not find short url with hash ${req.params.hash}`))
+    return
+  }
+
   // Browser
   let browser = short.stats.browser.find(b => b.family === user.family && b.major === user.major && b.minor === user.minor && b.patch === user.patch)
   if (!browser) {
