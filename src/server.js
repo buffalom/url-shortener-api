@@ -63,7 +63,7 @@ app.post('/signup', async (req, res) => {
   }
 })
 
-app.post('/login', async (req, res) => {
+app.post('/signin', async (req, res) => {
   try {
     let user = await User.findOne({
       email: req.body.email,
@@ -79,7 +79,7 @@ app.post('/login', async (req, res) => {
         secure: config.env === 'production',
       })
       logger.logInfo(`User logged in: ${user.email}`)
-      res.send({ message: 'Login successful' })
+      res.send({ message: 'Signin successful' })
     } else {
       throw new Error('Password incorrect')
     }

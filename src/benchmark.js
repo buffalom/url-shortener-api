@@ -30,11 +30,11 @@ async function main() {
     console.log('Could not sign up. Assuming already signed up.')
   }
 
-  // Login
+  // Signin
   try {
     let res = await axios({
       method: 'POST',
-      url: SERVICE.api + '/login',
+      url: SERVICE.api + '/signin',
       data: {
         email: EMAIL,
         password: PASSWORD
