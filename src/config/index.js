@@ -15,6 +15,8 @@ export default {
     port: process.env.PORT || 3000,
     allowedOrigins: [
       'localhost:3000',
+      'api.td2.ch',
+      'td2.ch',
     ],
   },
   database: {
